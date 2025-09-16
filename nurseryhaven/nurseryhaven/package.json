@@ -1,0 +1,19 @@
+
+{
+  "name": "nursery-haven",
+  "version": "1.0.0",
+  "description": "Full-stack nursery management application",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "install-all": "npm run install-backend && npm run install-frontend"
+  },
+  "keywords": ["nursery", "plants", "fullstack", "nodejs", "express", "mongodb"],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

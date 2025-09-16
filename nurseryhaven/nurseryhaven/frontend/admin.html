@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Dashboard - NurseryHaven</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+        />
+        <link href="style.css" rel="stylesheet" />
+    </head>
+
+    <body class="admin-page">
+        <!-- Admin Login Form -->
+        <div
+            id="adminLogin"
+            class="container-fluid d-flex justify-content-center align-items-center min-vh-100"
+        >
+            <div class="card" style="width: 400px">
+                <div class="card-header text-center bg-dark text-white">
+                    <h4><i class="fas fa-shield-alt me-2"></i>Admin Access</h4>
+                </div>
+                <div class="card-body">
+                    <form id="adminLoginForm">
+                        <div class="mb-3">
+                            <label for="adminId" class="form-label"
+                                >Admin ID</label
+                            >
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="adminId"
+                                required
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label"
+                                >Password</label
+                            >
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="adminPassword"
+                                required
+                            />
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100">
+                            Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard (Hidden by default) -->
+        <div id="adminDashboard" class="d-none">
+            <!-- Navigation -->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div class="container">
+                    <a
+                        class="navbar-brand fw-bold text-success"
+                        href="index.html"
+                    >
+                        <i class="fas fa-leaf me-2"></i>NurseryHaven Admin
+                    </a>
+                    <div class="navbar-nav ms-auto">
+                        <span class="navbar-text me-3"
+                            >Welcome, <span id="userName">Admin</span></span
+                        >
+                        <button
+                            onclick="adminLogout()"
+                            class="btn btn-outline-danger btn-sm me-2"
+                        >
+                            <i class="fas fa-user me-1"></i>Logout
+                        </button>
+                        <a
+                            href="index.html"
+                            class="btn btn-outline-success btn-sm"
+                        >
+                            <i class="fas fa-home me-1"></i>Back to Site
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="container-fluid mt-4">
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-md-3">
+                        <div class="list-group">
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action active"
+                                onclick="showSection('dashboard')"
+                            >
+                                <i class="fas fa-tachometer-alt me-2"></i
+                                >Dashboard
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('listings')"
+                            >
+                                <i class="fas fa-leaf me-2"></i>Manage Plants
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('add-plant')"
+                            >
+                                <i class="fas fa-plus me-2"></i>Add Plant
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('inventory')"
+                            >
+                                <i class="fas fa-boxes me-2"></i>Inventory
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('orders')"
+                            >
+                                <i class="fas fa-shopping-cart me-2"></i>Manage
+                                Orders
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('delivery')"
+                            >
+                                <i class="fas fa-truck me-2"></i>Delivery
+                                Tracking
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('customers')"
+                            >
+                                <i class="fas fa-users me-2"></i>Manage
+                                Customers
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('analytics')"
+                            >
+                                <i class="fas fa-chart-bar me-2"></i>Analytics
+                            </a>
+                            <a
+                                href="#"
+                                class="list-group-item list-group-item-action"
+                                onclick="showSection('consultations')"
+                            >
+                                <i class="fas fa-comments me-2"></i>Consultation
+                                Requests
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Main Panel -->
+                    <div class="col-md-9">
+                        <!-- Dashboard Section -->
+                        <div id="dashboard" class="admin-section">
+                            <h2>Admin Dashboard</h2>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body">
+                                            <h5>Total Customers</h5>
+                                            <h3 id="totalCustomers">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body">
+                                            <h5>Total Plants</h5>
+                                            <h3 id="totalPlants">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body">
+                                            <h5>Total Orders</h5>
+                                            <h3 id="totalOrders">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body">
+                                            <h5>Total Revenue</h5>
+                                            <h3 id="totalRevenue">₹0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customers Management Section -->
+                        <div id="customers" class="admin-section d-none">
+                            <h2>Manage Customers</h2>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Registered</th>
+                                            <th>Total Orders</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTable">
+                                        <!-- Customers will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Plants Management Section -->
+                        <div id="listings" class="admin-section d-none">
+                            <div
+                                class="d-flex justify-content-between align-items-center mb-3"
+                            >
+                                <h2>Manage Plants</h2>
+                                <div>
+                                    <select
+                                        class="form-select form-select-sm me-2"
+                                        id="statusFilter"
+                                        onchange="filterListings()"
+                                    >
+                                        <option value="all">All Plants</option>
+                                        <option value="active">
+                                            Active Only
+                                        </option>
+                                        <option value="inactive">
+                                            Inactive Only
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Plant Name</th>
+                                            <th>Price</th>
+                                            <th>Category</th>
+                                            <th>Stock</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="listingsTable">
+                                        <!-- Plants will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Add Plant Section -->
+                        <div id="add-plant" class="admin-section d-none">
+                            <h2>Add New Plant</h2>
+                            <div class="card">
+                                <div class="card-body">
+                                    <form id="addPlantForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label
+                                                        for="plantName"
+                                                        class="form-label"
+                                                        >Plant Name</label
+                                                    >
+                                                    <input
+                                                        type="text"
+                                                        class="form-control"
+                                                        id="plantName"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label
+                                                        for="plantPrice"
+                                                        class="form-label"
+                                                        >Price (₹)</label
+                                                    >
+                                                    <input
+                                                        type="number"
+                                                        class="form-control"
+                                                        id="plantPrice"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label
+                                                        for="plantCategory"
+                                                        class="form-label"
+                                                        >Category</label
+                                                    >
+                                                    <select
+                                                        class="form-select"
+                                                        id="plantCategory"
+                                                        required
+                                                    >
+                                                        <option value="">
+                                                            Select Category
+                                                        </option>
+                                                        <option value="Indoor">
+                                                            Indoor
+                                                        </option>
+                                                        <option value="Outdoor">
+                                                            Outdoor
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label
+                                                        for="plantStock"
+                                                        class="form-label"
+                                                        >Stock Quantity</label
+                                                    >
+                                                    <input
+                                                        type="number"
+                                                        class="form-control"
+                                                        id="plantStock"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label
+                                                for="plantDescription"
+                                                class="form-label"
+                                                >Description</label
+                                            >
+                                            <textarea
+                                                class="form-control"
+                                                id="plantDescription"
+                                                rows="3"
+                                                required
+                                            ></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label
+                                                for="plantImage"
+                                                class="form-label"
+                                                >Image URL</label
+                                            >
+                                            <input
+                                                type="url"
+                                                class="form-control"
+                                                id="plantImage"
+                                                required
+                                            />
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-success"
+                                        >
+                                            Add Plant
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventory Section -->
+                        <div id="inventory" class="admin-section d-none">
+                            <h2>Inventory Management</h2>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Plant Name</th>
+                                            <th>Current Stock</th>
+                                            <th>Min Stock Level</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventoryTable">
+                                        <!-- Inventory will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Orders Management Section -->
+                        <div id="orders" class="admin-section d-none">
+                            <h2>Manage Orders & Payments</h2>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Amount</th>
+                                            <th>Payment Status</th>
+                                            <th>Payment Method</th>
+                                            <th>Delivery Status</th>
+                                            <th>Order Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTable">
+                                        <!-- Orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Tracking Section -->
+                        <div id="delivery" class="admin-section d-none">
+                            <h2>Delivery Tracking</h2>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Order Date</th>
+                                            <th>Delivery Status</th>
+                                            <th>Tracking Info</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deliveryTable">
+                                        <!-- Delivery tracking will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Section -->
+                        <div id="analytics" class="admin-section d-none">
+                            <h2>Platform Analytics</h2>
+
+                            <!-- Analytics Filter Row -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Analytics Filter</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="analyticsTimeframe" class="form-label">Time Frame</label>
+                                                    <select class="form-select" id="analyticsTimeframe" onchange="updateAnalyticsData()">
+                                                        <option value="daily">Daily (Last 7 days)</option>
+                                                        <option value="monthly">Monthly (Last 6 months)</option>
+                                                        <option value="yearly">Yearly (Last 3 years)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="analyticsMetric" class="form-label">Metric</label>
+                                                    <select class="form-select" id="analyticsMetric" onchange="updateAnalyticsData()">
+                                                        <option value="revenue">Revenue</option>
+                                                        <option value="orders">Orders</option>
+                                                        <option value="customers">New Customers</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Quick Stats</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row text-center">
+                                                <div class="col-4">
+                                                    <div class="stat-item">
+                                                        <h5 class="text-success mb-0" id="todayRevenue">₹0</h5>
+                                                        <small class="text-muted">Today</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="stat-item">
+                                                        <h5 class="text-info mb-0" id="monthRevenue">₹0</h5>
+                                                        <small class="text-muted">This Month</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="stat-item">
+                                                        <h5 class="text-warning mb-0" id="yearRevenue">₹0</h5>
+                                                        <small class="text-muted">This Year</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Charts Row -->
+                            <div class="row">
+                                <!-- Revenue Trend Chart -->
+                                <div class="col-md-8">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-chart-line me-2"></i>
+                                                Revenue Trends
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="revenueChart" height="300"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Revenue Distribution Pie Chart -->
+                                <div class="col-md-4">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-chart-pie me-2"></i>
+                                                Revenue Distribution
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="revenuePieChart" height="300"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category Performance and Platform Stats -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-seedling me-2"></i>
+                                                Category Performance
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="categoryChart" height="250"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-warning text-white">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-chart-bar me-2"></i>
+                                                Revenue Breakdown
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Period</th>
+                                                            <th>Revenue</th>
+                                                            <th>Orders</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="revenueBreakdownTable">
+                                                        <tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Consultation Requests Section -->
+                        <div id="consultations" class="admin-section d-none">
+                            <h2>Consultation Requests</h2>
+                            <div class="table-responsive">
+                                <table
+                                    class="table table-bordered table-striped"
+                                >
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Message</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="consultationRequestsTable">
+                                        <!-- Requests will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="admin.js"></script>
+    </body>
+</html>

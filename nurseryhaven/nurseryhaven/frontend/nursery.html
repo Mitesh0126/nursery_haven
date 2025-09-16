@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect - Nursery Haven</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="text-center">
+            <h2>This page has been removed</h2>
+            <p>Redirecting you to our main plants catalog...</p>
+            <script>
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            </script>
+        </div>
+    </div>
+</body>
+
+</html>
+            showErrorMessage('Plant not found!');
+            return;
+        }
+
+        const existingItem = cart.find(item => item.id === plantId);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({
+                ...plant,
+                quantity: 1
+            });
+        }
+        updateCartCount();
+        saveCart();
+        showSuccessMessage(`${plant.name} added to cart!`);
+    }
+
+    function removeFromCart(plantId) {
+        cart = cart.filter(item => item.id !== plantId);
+        updateCartCount();
+        updateCartDisplay();
+        saveCart();
+    }
+
+    function updateQuantity(plantId, newQuantity) {
+        const item = cart.find(item => item.id === plantId);
+        if (item) {
+            if (newQuantity <= 0) {
+                removeFromCart(plantId);
+            } else {
+                item.quantity = newQuantity;
+                updateCartCount();
+                updateCartDisplay();
+                saveCart();
+            }
+        }
+    }
+
+    function updateCartCount() {
+        const cartCountElement = document.getElementById('cart-count');
+        if (cartCountElement) {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCountElement.textContent = count;
+        }
+    }
+
+    function updateCartDisplay() {
+        const cartItems = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        if (!cartItems || !cartTotal) return;
+
+        if (cart.length === 0) {
+            cartItems.innerHTML = '<p class="text-muted text-center">Your cart is empty</p>';
+            cartTotal.textContent = '0.00';
+            return;
+        }
+
+        let total = 0;
+        cartItems.innerHTML = cart.map(item => {
+            total += item.price * item.quantity;
+            return `
+                <div class="cart-item d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-seedling fa-2x text-success"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${item.name}</h6>
+                        <p class="text-muted mb-0">₹${item.price.toFixed(2)} each</p>
+                        <small class="text-muted">${item.category} - From: ${getNurseryName(item.dealerId)}</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                        <span class="mx-2">${item.quantity}</span>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeFromCart(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        cartTotal.textContent = total.toFixed(2);
+    }
+
+    function saveCart() {
+        localStorage.setItem('nurseryCart', JSON.stringify(cart));
+    }
+
+    function getNurseryName(dealerId) {
+        const users = JSON.parse(localStorage.getItem('nurseryUsers')) || [];
+        const dealer = users.find(u => u.id == dealerId);
+        return dealer ? (dealer.businessName || dealer.name) : 'Unknown Nursery';
+    }
+
+    function checkout() {
+        if (cart.length === 0) {
+            showErrorMessage('Your cart is empty!');
+            return;
+        }
+
+        if (!isAuthenticated) {
+            showErrorMessage('Please log in to proceed with checkout.');
+            return;
+        }
+
+        showContactDetailsModal();
+    }
+
+    function showContactDetailsModal() {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div class="modal fade" id="contactDetailsModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Checkout - Contact & Payment Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="contactDetailsForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-success mb-3">📦 Delivery Information</h6>
+                                        <div class="mb-3">
+                                            <label for="deliveryName" class="form-label">Full Name *</label>
+                                            <input type="text" class="form-control" id="deliveryName" required placeholder="Enter the name for delivery">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="deliveryPhone" class="form-label">Phone Number *</label>
+                                            <input type="tel" class="form-control" id="deliveryPhone" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="deliveryAddress" class="form-label">Delivery Address *</label>
+                                            <textarea class="form-control" id="deliveryAddress" rows="3" required placeholder="Enter your complete address including pincode"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="deliveryCity" class="form-label">City *</label>
+                                            <input type="text" class="form-control" id="deliveryCity" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="deliveryPincode" class="form-label">Pincode *</label>
+                                            <input type="text" class="form-control" id="deliveryPincode" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="deliveryNotes" class="form-label">Special Instructions (Optional)</label>
+                                            <textarea class="form-control" id="deliveryNotes" rows="2" placeholder="Any special delivery instructions"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-success mb-3">💳 Payment Information</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Payment Method *</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCard" value="card" checked>
+                                                <label class="form-check-label" for="paymentCard">
+                                                    <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentUPI" value="upi">
+                                                <label class="form-check-label" for="paymentUPI">
+                                                    <i class="fas fa-mobile-alt me-2"></i>UPI Payment
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCOD" value="cod">
+                                                <label class="form-check-label" for="paymentCOD">
+                                                    <i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div id="cardDetails" class="mb-3">
+                                            <label for="cardNumber" class="form-label">Card Number *</label>
+                                            <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456">
+                                            <div class="row mt-2">
+                                                <div class="col-6">
+                                                    <label for="cardExpiry" class="form-label">Expiry *</label>
+                                                    <input type="text" class="form-control" id="cardExpiry" placeholder="MM/YY">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label for="cardCVV" class="form-label">CVV *</label>
+                                                    <input type="text" class="form-control" id="cardCVV" placeholder="123">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="upiDetails" class="mb-3 d-none">
+                                            <label for="upiId" class="form-label">UPI ID *</label>
+                                            <input type="text" class="form-control" id="upiId" placeholder="example@upi">
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <strong>Order Summary:</strong><br>
+                                            <small>Total Items: ${cart.length}<br>
+                                            Total Amount: ₹${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-success" onclick="processPayment()">Pay Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        const contactModal = new bootstrap.Modal(document.getElementById('contactDetailsModal'));
+        contactModal.show();
+
+        if (isAuthenticated && currentUser) {
+            const deliveryNameField = document.getElementById('deliveryName');
+            if (deliveryNameField) {
+                deliveryNameField.value = currentUser.name;
+            }
+        }
+
+        // Payment method toggle
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const cardDetails = document.getElementById('cardDetails');
+                const upiDetails = document.getElementById('upiDetails');
+
+                if (this.value === 'card') {
+                    cardDetails.classList.remove('d-none');
+                    upiDetails.classList.add('d-none');
+                } else if (this.value === 'upi') {
+                    cardDetails.classList.add('d-none');
+                    upiDetails.classList.remove('d-none');
+                } else {
+                    cardDetails.classList.add('d-none');
+                    upiDetails.classList.add('d-none');
+                }
+            });
+        });
+
+        document.getElementById('contactDetailsModal').addEventListener('hidden.bs.modal', function () {
+            document.body.removeChild(modal);
+        });
+    }
+
+    function processPayment() {
+        const form = document.getElementById('contactDetailsForm');
+        const name = document.getElementById('deliveryName').value.trim();
+        const phone = document.getElementById('deliveryPhone').value.trim();
+        const address = document.getElementById('deliveryAddress').value.trim();
+        const city = document.getElementById('deliveryCity').value.trim();
+        const pincode = document.getElementById('deliveryPincode').value.trim();
+        const notes = document.getElementById('deliveryNotes').value.trim();
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+        // Validation
+        if (!name || name.length < 2) {
+            showErrorMessage('Please enter a valid name (at least 2 characters).');
+            return;
+        }
+        const phoneRegex = /^\d{10}$/;
+        if (!phone || !phoneRegex.test(phone)) {
+            showErrorMessage('Please enter a valid 10-digit phone number.');
+            return;
+        }
+        if (!address || address.length < 10) {
+            showErrorMessage('Please enter a complete delivery address.');
+            return;
+        }
+        if (!city || city.length < 2) {
+            showErrorMessage('Please enter a valid city name.');
+            return;
+        }
+        const pincodeRegex = /^\d{6}$/;
+        if (!pincode || !pincodeRegex.test(pincode)) {
+            showErrorMessage('Please enter a valid 6-digit pincode.');
+            return;
+        }
+
+        // Payment validation
+        if (paymentMethod === 'card') {
+            const cardNumber = document.getElementById('cardNumber').value.trim();
+            const cardExpiry = document.getElementById('cardExpiry').value.trim();
+            const cardCVV = document.getElementById('cardCVV').value.trim();
+
+            if (!cardNumber || cardNumber.length < 16) {
+                showErrorMessage('Please enter a valid card number.');
+                return;
+            }
+            if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                showErrorMessage('Please enter a valid expiry date (MM/YY).');
+                return;
+            }
+            if (!cardCVV || cardCVV.length !== 3) {
+                showErrorMessage('Please enter a valid 3-digit CVV.');
+                return;
+            }
+        } else if (paymentMethod === 'upi') {
+            const upiId = document.getElementById('upiId').value.trim();
+            if (!upiId || !upiId.includes('@')) {
+                showErrorMessage('Please enter a valid UPI ID.');
+                return;
+            }
+        }
+
+        // Show payment processing
+        showPaymentProcessingModal();
+    }
+
+    function showPaymentProcessingModal() {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div class="modal fade" id="paymentProcessingModal" tabindex="-1" data-bs-backdrop="static">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-body text-center p-4">
+                            <div class="spinner-border text-success mb-3" role="status">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <h6>Processing Payment...</h6>
+                            <p class="text-muted">Please wait while we process your payment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        const processingModal = new bootstrap.Modal(document.getElementById('paymentProcessingModal'));
+        processingModal.show();
+
+        // Simulate payment processing
+        setTimeout(() => {
+            processingModal.hide();
+            document.body.removeChild(modal);
+            showPaymentSuccessModal();
+        }, 3000);
+    }
+
+    function showPaymentSuccessModal() {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div class="modal fade" id="paymentSuccessModal" tabindex="-1">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-body text-center p-4">
+                            <div class="text-success mb-3">
+                                <i class="fas fa-check-circle fa-3x"></i>
+                            </div>
+                            <h5 class="text-success">Payment Successful!</h5>
+                            <p class="text-muted">Your order has been placed successfully.</p>
+                            <div class="alert alert-success">
+                                <strong>Order #${Date.now()}</strong><br>
+                                <small>You will receive a confirmation email shortly.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" onclick="completeOrderAfterPayment()">Continue</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        const successModal = new bootstrap.Modal(document.getElementById('paymentSuccessModal'));
+        successModal.show();
+
+        document.getElementById('paymentSuccessModal').addEventListener('hidden.bs.modal', function () {
+            document.body.removeChild(modal);
+        });
+    }
+
+    function completeOrderAfterPayment() {
+        const name = document.getElementById('deliveryName').value.trim();
+        const phone = document.getElementById('deliveryPhone').value.trim();
+        const address = document.getElementById('deliveryAddress').value.trim();
+        const city = document.getElementById('deliveryCity').value.trim();
+        const pincode = document.getElementById('deliveryPincode').value.trim();
+        const notes = document.getElementById('deliveryNotes').value.trim();
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+        // Get dealerId for bank details (assume all items from same dealer for simplicity)
+        const dealerId = cart.length > 0 ? cart[0].dealerId : null;
+        let dealerBankDetails = null;
+        if (dealerId) {
+            const users = JSON.parse(localStorage.getItem('nurseryUsers')) || [];
+            const dealer = users.find(u => u.id == dealerId);
+            dealerBankDetails = dealer && dealer.bankDetails ? dealer.bankDetails : null;
+        }
+
+        const isCOD = paymentMethod === 'cod';
+        const paymentStatus = isCOD ? 'pending' : 'completed';
+
+        const orderData = {
+            id: Date.now(),
+            customerId: currentUser.id,
+            customerName: currentUser.name,
+            items: cart.map(item => ({
+                ...item,
+                nurseryName: getNurseryName(item.dealerId)
+            })),
+            total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            deliveryData: {
+                name: name,
+                phone: phone,
+                address: address,
+                city: city,
+                pincode: pincode,
+                notes: notes
+            },
+            paymentData: {
+                method: paymentMethod,
+                status: paymentStatus,
+                transactionId: paymentStatus === 'completed' ? 'TXN' + Date.now() : '',
+                amount: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                commission: calculateCommission(cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)),
+                releasedToDealer: false,
+                releaseDate: null
+            },
+            isCOD: isCOD,
+            dealerBankDetails: dealerBankDetails,
+            status: isCOD ? 'pending' : 'paid',
+            orderDate: new Date().toISOString(),
+            estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        };
+
+        const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
+        orderHistory.push(orderData);
+        localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+
+        cart = [];
+        saveCart();
+        updateCartCount();
+        updateCartDisplay();
+
+        showSuccessMessage('Order placed successfully! You will receive a confirmation shortly.');
+
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+    }
+
+    function calculateCommission(totalAmount) {
+        // 10% commission on total order value
+        return totalAmount * 0.10;
+    }
+
+    function showMessage(message, type = 'success') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 100px; right: 20px; z-index: 9999; max-width: 350px;';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    function showSuccessMessage(message) {
+        showMessage(message, 'success');
+    }
+
+    function showErrorMessage(message) {
+        showMessage(message, 'danger');
+    }
+
+    // Get nursery id from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nurseryId = urlParams.get('id');
+    const users = JSON.parse(localStorage.getItem('nurseryUsers')) || [];
+    const dealerListings = JSON.parse(localStorage.getItem('dealerListings')) || [];
+    const nursery = users.find(u => u.id == nurseryId && u.userType === 'dealer' && u.status === 'approved');
+    const headerDiv = document.getElementById('nursery-header');
+    const plantsList = document.getElementById('nursery-plants-list');
+
+    if (!nursery) {
+        headerDiv.innerHTML = '<div class="alert alert-danger">Nursery not found or not approved.</div>';
+    } else {
+        headerDiv.innerHTML = `
+            <h2 class="fw-bold text-success mb-2">${nursery.businessName || nursery.name}</h2>
+            <p class="mb-1"><strong>Category:</strong> ${nursery.businessCategory || 'Nursery'}</p>
+            <p class="mb-1"><strong>Address:</strong> ${nursery.businessAddress || ''}</p>
+            <p class="mb-1"><strong>Owner:</strong> ${nursery.name}</p>
+        `;
+
+        // Add category filter buttons
+        const filterButtons = document.createElement('div');
+        filterButtons.className = 'text-center mb-4';
+        filterButtons.innerHTML = `
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-success filter-btn active" data-category="all">
+                    All Plants
+                </button>
+                <button type="button" class="btn btn-outline-success filter-btn" data-category="Indoor">
+                    Indoor Plants
+                </button>
+                <button type="button" class="btn btn-outline-success filter-btn" data-category="Outdoor">
+                    Outdoor Plants
+                </button>
+            </div>
+        `;
+        headerDiv.appendChild(filterButtons);
+
+        // Show only active plants listed by this nursery's dealer
+        const plants = dealerListings.filter(p => p.dealerId == nurseryId && p.status === 'active');
+
+        function displayPlants(category = 'all') {
+            plantsList.innerHTML = '';
+            const filteredPlants = category === 'all'
+                ? plants
+                : plants.filter(p => p.category === category);
+
+            if (filteredPlants.length === 0) {
+                plantsList.innerHTML = '<div class="col-12 text-center text-muted">No plants available in this category.</div>';
+                return;
+            }
+
+            filteredPlants.forEach(plant => {
+                const col = document.createElement('div');
+                col.className = 'col-lg-4 col-md-6 mb-4';
+                col.innerHTML = `
+                    <div class='card h-100'>
+                        <div class='card-body d-flex flex-column'>
+                            <h5 class='card-title text-success fw-bold mb-2'>${plant.name}</h5>
+                            <p class='card-text text-muted mb-2'>${plant.description || ''}</p>
+                            <p class='card-text'><span class='badge bg-info'>${plant.category || ''}</span></p>
+                            <div class='d-flex justify-content-between align-items-center mt-auto'>
+                                <span class='plant-price'>₹${plant.price}</span>
+                                <div class='d-flex align-items-center gap-2'>
+                                    <span class='badge bg-secondary'>Stock: ${plant.stock}</span>
+                                    <button class='btn btn-success btn-sm' onclick='addToCart(${plant.id})'>
+                                        <i class='fas fa-cart-plus me-1'></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                plantsList.appendChild(col);
+            });
+        }
+
+        // Initial display
+        displayPlants();
+
+        // Add event listeners for filter buttons
+        filterButtons.addEventListener('click', function (e) {
+            if (e.target.classList.contains('filter-btn')) {
+                filterButtons.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                const category = e.target.getAttribute('data-category');
+                displayPlants(category);
+            }
+        });
+
+        // Update cart display when modal is opened
+        const cartModal = document.getElementById('cartModal');
+        if (cartModal) {
+            cartModal.addEventListener('show.bs.modal', updateCartDisplay);
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

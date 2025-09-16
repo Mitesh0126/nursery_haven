@@ -1,0 +1,14 @@
+
+{
+  "name": "nursery-haven-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Nursery Haven",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 3000",
+    "serve": "python -m http.server 3000"
+  },
+  "keywords": ["nursery", "plants", "frontend", "html", "css", "javascript"],
+  "author": "",
+  "license": "ISC"
+}
